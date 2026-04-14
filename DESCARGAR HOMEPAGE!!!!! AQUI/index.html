@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Principal - Sistema Clínico</title>
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body class="layout-sidebar">
+    <aside class="sidebar" id="miSidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">Red de Clínicas Privadas del Perú</div>
+            <button class="btn-toggle" id="btnToggle">☰</button>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li><a href="index.html" class="activo"><span>Inicio</span></a></li>
+            <li><a href="admision.html"><span>Admisión y Consultas</span></a></li>
+            <li><a href="atencion_medica.html"><span>Atención Médica</span></a></li>
+            <li><a href="farmacia.html"><span>Farmacia</span></a></li>
+            <li><a href="caja_y_facturacion.html"><span>Caja y Facturación</span></a></li>
+            <li><a href="administracion.html"><span>Administración</span></a></li>
+        </ul>
+    </aside>
+
+    <div class="contenido-wrapper">
+
+        <header class="header-top">
+            <h1>Resumen Operativo</h1>
+            <p>Usuario: Dr. Carlos Mendoza</p>
+        </header>
+
+        <main class="dashboard-main">
+            <section class="dashboard-grid">
+
+                <article class="tarjeta-resumen">
+                    <h3>Pacientes en Emergencia</h3>
+                    <p>Actualmente hay <strong>12</strong> pacientes registrados en triaje.</p>
+                </article>
+
+                <article class="tarjeta-resumen">
+                    <h3>Citas del Día</h3>
+                    <p>Hay <strong>45</strong> citas programadas para hoy en Consulta Externa.</p>
+                </article>
+
+                <article class="tarjeta-resumen">
+                    <h3>Estado de Caja</h3>
+                    <p>Caja Principal: <strong style="color: var(--color-acento);">Abierta</strong></p>
+                </article>
+
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2026 Red de Clínicas Privadas del Perú. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+
+    <script>
+        const btnToggle = document.getElementById('btnToggle');
+        const sidebar = document.getElementById('miSidebar');
+
+        btnToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('colapsado');
+        });
+    </script>
+</body>
+
+</html>
