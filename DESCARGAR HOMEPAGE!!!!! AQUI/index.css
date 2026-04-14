@@ -1,0 +1,74 @@
+/* ==========================================================================
+   ESTILOS ESPECÍFICOS DEL DASHBOARD
+   ========================================================================== */
+/* Contenedor Main del Dashboard */
+.dashboard-main {
+    flex: 1;
+    padding: 2rem 1rem 3rem;
+    /* padding: arriba(2rem) lados(1rem) abajo(3rem) */
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Cuadrícula y Títulos */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.dashboard-titulo {
+    font-size: 1.25rem;
+    border-bottom: 3px solid var(--color-acento);
+    display: inline-block;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Tarjetas de Resumen */
+.tarjeta-resumen {
+    background-color: var(--color-bg-blanco);
+    padding: 1.5rem;
+    border-radius: var(--borde-redondeado);
+    box-shadow: var(--sombra-suave);
+    border-left: 4px solid var(--color-texto-titulo);
+    transition: var(--transicion-estandar);
+}
+
+.tarjeta-resumen:hover {
+    border-left-color: var(--color-acento);
+    transform: translateY(-4px);
+    box-shadow: var(--sombra-hover);
+}
+
+.tarjeta-resumen h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.tarjeta-resumen p {
+    font-size: 0.95rem;
+}
+
+.tarjeta-resumen p strong {
+    color: var(--color-acento);
+}
+
+/* Responsive Dashboard */
+@media screen and (min-width: 768px) {
+    .menu-principal ul {
+        justify-content: center;
+        overflow-x: visible;
+        white-space: normal;
+    }
+
+    .dashboard-titulo {
+        grid-column: 1 / -1;
+        font-size: 1.5rem;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
