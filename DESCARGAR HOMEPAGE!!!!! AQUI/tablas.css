@@ -1,6 +1,5 @@
-/* ==========================================================================
-   Tablas de Datos
-   ========================================================================== */
+/* Tablas de Datos */
+
 table {
     width: 100%;
     border-collapse: separate;
@@ -45,10 +44,8 @@ tbody tr:last-child td {
     border-bottom: none;
 }
 
-/* ==========================================================================
-   Botones y Acciones dentro de Tablas
-   ========================================================================== */
-/* Modificador para botones más compactos que no deformen las filas */
+/* Botones y Acciones dentro de Tablas */
+
 button.btn-tabla {
     margin: 0;
     padding: 0.4rem 0.8rem;
