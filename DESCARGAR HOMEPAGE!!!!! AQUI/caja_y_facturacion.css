@@ -1,26 +1,20 @@
-/* ==========================================================================
-   Estilos Específicos: Módulo de Caja y Facturación
-   ========================================================================== */
+/* Estilos Específicos: Módulo de Caja y Facturación */
 
-/* Tabla de Estado de Cuenta */
 .col-centrada {
     text-align: center;
 }
 
-/*Control de Caja (Operaciones de Turno) */
 .fieldset-operaciones {
     border: none;
     padding: 0;
     margin: 0 0 4rem 0;
 }
 
-/* Hacemos los botones de cuadre y cierre un poco más robustos */
 button.btn-operacion {
     font-size: 0.95rem;
     padding: 0.8rem 1.5rem;
 }
 
-/* Mejora de accesibilidad para los checkboxes de cobro */
 input[type="checkbox"] {
     width: 1.2rem;
     height: 1.2rem;

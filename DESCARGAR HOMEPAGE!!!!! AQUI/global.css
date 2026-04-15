@@ -1,8 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-/* ==========================================================================
-   1. VARIABLES GLOBALES
-   ========================================================================== */
+/* 1. VARIABLES GLOBALES */
+
 :root {
     --color-bg-principal: #F5F7FA;
     --color-bg-blanco: #FFFFFF;
@@ -20,9 +19,9 @@
     --color-nav-hover-texto: #003366;
 }
 
-/* ==========================================================================
-   2. RESET Y BASE (Aplican a todas las páginas)
-   ========================================================================== */
+
+/* 2. RESET Y BASE */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -53,17 +52,15 @@ h6 {
     font-weight: 600;
 }
 
-
-/* Ajustes Responsive Generales */
 @media screen and (min-width: 768px) {
     header h1 {
         font-size: 2rem;
     }
 }
 
-/* ==========================================================================
-   3. CLASES UTILITARIAS (Para centrar contenido en cualquier página)
-   ========================================================================== */
+
+/* 3. CLASES UTILITARIAS */
+
 .contenedor {
     max-width: 1200px;
     margin: 0 auto;
@@ -71,19 +68,16 @@ h6 {
     width: 100%;
 }
 
-/* Hacemos que el main empuje el footer siempre hacia abajo */
 main.contenedor {
     flex: 1;
     margin-bottom: 3rem;
     padding-top: 2rem;
 }
 
-/* Ocultamos el título "Navegación" del menú secundario */
 .menu-secundario h2 {
     display: none;
 }
 
-/* Grupo de botones horizontales genérico */
 .grupo-acciones {
     display: flex;
     flex-direction: row;
@@ -93,37 +87,29 @@ main.contenedor {
     flex-wrap: wrap;
 }
 
-/* ==========================================================================
-   4. SIDEBAR (Menú Lateral)
-   ========================================================================== */
 
-/* 1. Cambiamos el body para que la pantalla se divida en 2 columnas (Sidebar + Contenido) */
+/* 4. SIDEBAR */
+
 body.layout-sidebar {
     flex-direction: row;
     height: 100vh;
     overflow: hidden;
-    /* Evita que toda la página haga scroll, solo el contenido derecho lo hará */
 }
 
-/* 2. Diseño del Sidebar */
 .sidebar {
     width: 260px;
     background-color: var(--color-nav-bg);
-    /* Tu azul oscuro corporativo */
     color: var(--color-bg-blanco);
     display: flex;
     flex-direction: column;
     transition: width 0.3s ease;
-    /* Animación suave al colapsar */
     z-index: 100;
 }
 
-/* Estado colapsado del Sidebar */
 .sidebar.colapsado {
     width: 70px;
 }
 
-/* 3. Cabecera del Sidebar (Logo y Botón) */
 .sidebar-header {
     padding: 1.5rem 1rem;
     display: flex;
@@ -134,13 +120,10 @@ body.layout-sidebar {
 
 .sidebar-logo {
     font-size: 1rem;
-    /* Reducimos ligeramente el tamaño de fuente */
     font-weight: 600;
     line-height: 1.3;
     white-space: normal;
-    /* Permitimos que salte a una segunda línea */
     width: 180px;
-    /* Damos un ancho fijo para que el salto sea natural */
     overflow: hidden;
     transition: opacity 0.3s, width 0.3s;
 }
@@ -149,7 +132,6 @@ body.layout-sidebar {
     opacity: 0;
     width: 0;
     white-space: nowrap;
-    /* Previene que crezca hacia abajo durante la animación de cierre */
 }
 
 .btn-toggle {
@@ -161,7 +143,6 @@ body.layout-sidebar {
     padding: 0 0.5rem;
 }
 
-/* 4. Enlaces del menú */
 .sidebar-menu {
     list-style: none;
     padding: 1rem 0;
@@ -181,27 +162,22 @@ body.layout-sidebar {
     white-space: nowrap;
 }
 
-/* Iconos falsos (puedes cambiarlos por FontAwesome luego) */
 .sidebar-menu li a::before {
     content: '▪';
-    /* Un cuadrito temporal como icono */
     margin-right: 15px;
     font-size: 1.2rem;
 }
 
 .sidebar.colapsado .sidebar-menu li a span {
     display: none;
-    /* Oculta el texto al colapsar */
 }
 
 .sidebar-menu li a:hover,
 .sidebar-menu li a.activo {
     background-color: var(--color-acento);
-    /* Se pinta de verde al pasar el mouse */
     color: white;
 }
 
-/* Títulos separadores dentro del menú lateral */
 .sidebar-menu .menu-titulo {
     padding: 1rem 1.5rem 0.3rem;
     font-size: 0.75rem;
@@ -212,20 +188,16 @@ body.layout-sidebar {
 
 .sidebar.colapsado .sidebar-menu .menu-titulo {
     display: none;
-    /* Ocultamos los títulos cuando se colapsa */
 }
 
-/* 5. Área de contenido derecho */
 .contenido-wrapper {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    /* Solo esta parte hará scroll vertical */
     background-color: var(--color-bg-principal);
 }
 
-/* Ajustamos tu cabecera blanca superior para que sea más delgada */
 .header-top {
     background-color: var(--color-bg-blanco);
     padding: 1rem 2rem;

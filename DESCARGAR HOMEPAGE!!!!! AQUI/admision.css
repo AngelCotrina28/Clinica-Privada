@@ -1,13 +1,10 @@
-/* ==========================================================================
-   Configuración Base (Módulo Admisión)
-   ========================================================================== */
-/* Damos un respiro a las secciones del main para que no se peguen */
+/* Configuración Base (Módulo Admisión) */
+
 main section {
     margin-bottom: 3.5rem;
     background-color: transparent;
 }
 
-/* Convertimos la sección en una sola columna vertical ordenada */
 @media screen and (min-width: 768px) {
     main section {
         display: flex;
@@ -16,7 +13,6 @@ main section {
     }
 }
 
-/* Subtítulos internos (ej. "Órdenes de Emergencia Registradas Hoy") */
 main section h3 {
     margin-top: 2.5rem;
     font-size: 1.1rem;

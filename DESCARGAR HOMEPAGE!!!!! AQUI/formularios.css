@@ -1,9 +1,7 @@
-/* ==========================================================================
-   Formularios (Estilo Plano / Minimalista)
-   ========================================================================== */
+/* Formularios */
+
 fieldset {
     border: none;
-    /* Quitamos la caja rígida por defecto */
     padding: 0;
     margin: 0;
 }
@@ -15,11 +13,9 @@ legend {
     margin-bottom: 0.5rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #E0E6ED;
-    /* Línea sutil separadora */
     width: 100%;
 }
 
-/* Alineamos los campos de forma ordenada en una columna */
 form {
     display: flex;
     flex-direction: column;
@@ -37,7 +33,7 @@ label {
     margin-top: 1rem;
 }
 
-/* Diseño de los inputs, listas y áreas de texto (Estilo Caja Sólida) */
+
 input[type="text"],
 input[type="datetime-local"],
 select,
@@ -54,7 +50,6 @@ textarea {
     resize: vertical;
 }
 
-/* Efecto al hacer clic en un campo (Foco) */
 input[type="text"]:focus,
 input[type="datetime-local"]:focus,
 select:focus,
@@ -65,17 +60,14 @@ textarea:focus {
     box-shadow: 0 0 0 3px rgba(0, 194, 160, 0.15);
 }
 
-/* Espaciado Final de Pantalla */
 .fieldset-final {
     border: none;
     padding: 0;
     margin: 0 0 4rem 0;
 }
 
-/* ==========================================================================
-   Botones de Acción
-   ========================================================================== */
-/* Contenedor implícito de botones */
+/* Botones de Acción */
+
 form button {
     margin-top: 1rem;
     margin-right: 0.5rem;
@@ -88,7 +80,6 @@ form button {
     transition: var(--transicion-estandar);
 }
 
-/* Botón Principal (Submit - Color Acento) */
 button[type="submit"] {
     background-color: var(--color-acento);
     color: #FFFFFF;
@@ -97,13 +88,10 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
     background-color: #00A388;
-    /* Verde un poco más oscuro al pasar el ratón */
     transform: translateY(-2px);
-    /* Pequeño salto elegante */
     box-shadow: 0 4px 10px rgba(0, 194, 160, 0.3);
 }
 
-/* Botón Secundario (Button - Estilo Contorno) */
 button[type="button"] {
     background-color: transparent;
     color: var(--color-texto-titulo);
