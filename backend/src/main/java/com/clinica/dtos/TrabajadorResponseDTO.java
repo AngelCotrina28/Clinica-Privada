@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -23,7 +24,11 @@ public class TrabajadorResponseDTO {
     private String colegiatura;
     
     // Solo enviamos el nombre del rol (ej. "Médico"), no todo el objeto Rol
-    private String nombreRol; 
+    private Long rolId; 
+    private String nombreRol;
     
     private boolean activo;
+
+    // Devolverá algo como: ["Cardiología", "Pediatría"]
+    private List<String> especialidades;
 }

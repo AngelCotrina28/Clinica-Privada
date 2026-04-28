@@ -31,6 +31,21 @@ export class AdministracionTrabajadoresComponent implements OnInit {
       colegiatura: [''],
       rolId: ['', Validators.required]
     });
+    this.trabajadorForm.get('rolId')?.valueChanges.subscribe(rolId => {
+      const colegiaturaControl = this.trabajadorForm.get('colegiatura');
+      
+      // Suponiendo que el ID 2 es "Médico" (según tu HTML anterior)
+      if (rolId === "2") { 
+        // Si es médico, agregamos la validación de obligatorio
+        colegiaturaControl?.setValidators([Validators.required]);
+      } else {
+        // Si es cualquier otro rol, limpiamos las validaciones
+        colegiaturaControl?.clearValidators();
+      }
+      
+      // Refrescamos el estado del campo para que Angular se entere del cambio
+      colegiaturaControl?.updateValueAndValidity();
+    });
   }
 
   ngOnInit(): void {
@@ -63,7 +78,7 @@ export class AdministracionTrabajadoresComponent implements OnInit {
       telefono: trabajador.telefono,
       fechaNacimiento: trabajador.fechaNacimiento,
       colegiatura: trabajador.colegiatura,
-      rolId: 1 // Aquí deberías mapear el ID real del rol
+      rolId: trabajador.rolId.toString()
     });
     
     // La contraseña no es obligatoria al editar
@@ -83,8 +98,8 @@ export class AdministracionTrabajadoresComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al actualizar:', err);
-          // Atrapamos el mensaje de error de Spring Boot
-          const mensaje = err.error?.message || 'Error al actualizar. Verifica que el DNI o Correo no estén repetidos.';
+          // Atrapamos el mensaje de error de Springs Boot
+          const mensaje = err.error?.mensaje || 'Error al actualizar. Verifica que el DNI o Correo no estén repetidos.';
           alert('❌ ' + mensaje);
         }
       });
@@ -98,7 +113,7 @@ export class AdministracionTrabajadoresComponent implements OnInit {
         error: (err) => {
           console.error('Error al crear:', err);
           // Atrapamos el mensaje de error de Spring Boot ("El correo ya está registrado")
-          const mensaje = err.error?.message || 'Error al registrar. Verifica que el DNI o Correo no estén repetidos en el sistema.';
+          const mensaje = err.error?.mensaje || 'Error al registrar. Verifica que el DNI o Correo no estén repetidos en el sistema.';
           alert('❌ ' + mensaje);
         }
       });
