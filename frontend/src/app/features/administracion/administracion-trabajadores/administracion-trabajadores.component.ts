@@ -1,100 +1,133 @@
-/*import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TrabajadorService } from '../../../core/services/Trabajador.service';
-import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TrabajadorService } from '../../../core/services/trabajador.service';
+import { Trabajador } from '../../../core/model/trabajador.model';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-administracion',
+  selector: 'app-administracion-trabajadores',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgbModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './administracion-trabajadores.component.html',
-  styleUrls: ['./administracion-trabajadores.component.scss']
+  styleUrl: './administracion-trabajadores.component.scss'
 })
 export class AdministracionTrabajadoresComponent implements OnInit {
-  TrabajadorForm!: FormGroup;
-  mensajeError: string = '';
-  Trabajadors: any[] = []; 
+  
+  isEditMode: boolean = false;
+  idSeleccionado: number | null = null;
+  trabajadorForm: FormGroup;
+  listaTrabajadores: Trabajador[] = [];
+  isModalOpen: boolean = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private TrabajadorService: TrabajadorService,
-    private modalService: NgbModal
-  ) {}
-
-  ngOnInit(): void {
-    this.inicializarFormulario();
-    this.cargarTrabajadors(); 
-  }
-
-  inicializarFormulario(): void {
-    this.TrabajadorForm = this.fb.group({
-      dni: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(8)]],
+  constructor(private fb: FormBuilder, private trabajadorService: TrabajadorService) {
+    this.trabajadorForm = this.fb.group({
+      dni: ['', [Validators.required, Validators.minLength(8)]],
       nombreCompleto: ['', Validators.required],
-      username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
+      username: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      telefono: [''],
+      fechaNacimiento: [''],
+      colegiatura: [''],
       rolId: ['', Validators.required]
     });
   }
 
-  cargarTrabajadors(): void {
-    this.TrabajadorService.listarTrabajadors().subscribe({
+  ngOnInit(): void {
+    this.cargarTrabajadores();
+  }
+
+  cargarTrabajadores(): void {
+    this.trabajadorService.listarTodos().subscribe({
       next: (data) => {
-        this.Trabajadors = data;
+        this.listaTrabajadores = data;
+        console.log('Datos recibidos del backend:', data);
       },
       error: (err) => {
-        console.error('Error al cargar Trabajadors', err);
+        console.error('Error al conectar con Spring Boot:', err);
       }
     });
   }
 
-  // Se activa al presionar el botón de arriba
-  abrirModal(modalContent: any): void {
-    this.TrabajadorForm.reset();
-    this.mensajeError = '';
-    this.modalService.open(modalContent, { backdrop: 'static', size: 'lg', centered: true }); 
-  }
-
-  registrar(modalActivo: any): void {
-    if (this.TrabajadorForm.invalid) {
-      this.TrabajadorForm.markAllAsTouched();
-      return;
-    }
-
-    this.TrabajadorService.registrarTrabajador(this.TrabajadorForm.value).subscribe({
-      next: (res) => {
-        alert('¡Personal registrado exitosamente!'); 
-        modalActivo.close(); 
-        this.cargarTrabajadors(); 
-      },
-      error: (err) => {
-        this.mensajeError = err.error?.message || 'Ocurrió un error al registrar el Trabajador.';
-      }
-    });
-  }
-}*/
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-@Component({
-  selector: 'app-trabajadores',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './administracion-trabajadores.component.html',
-  styleUrl: './administracion-trabajadores.component.scss'
-})
-export class AdministracionTrabajadoresComponent {
-  
-  // Variable que controla si el modal se ve o no
-  isModalOpen: boolean = false;
-
-  abrirModal(): void {
+  prepararEdicion(trabajador: Trabajador) {
+    this.isEditMode = true;
+    this.idSeleccionado = trabajador.id;
     this.isModalOpen = true;
+
+    // Llenamos el formulario con los datos del trabajador
+    this.trabajadorForm.patchValue({
+      dni: trabajador.dni,
+      nombreCompleto: trabajador.nombreCompleto,
+      username: trabajador.username,
+      email: trabajador.email,
+      telefono: trabajador.telefono,
+      fechaNacimiento: trabajador.fechaNacimiento,
+      colegiatura: trabajador.colegiatura,
+      rolId: 1 // Aquí deberías mapear el ID real del rol
+    });
+    
+    // La contraseña no es obligatoria al editar
+    this.trabajadorForm.get('password')?.clearValidators();
+    this.trabajadorForm.get('password')?.updateValueAndValidity();
   }
 
-  cerrarModal(): void {
-    this.isModalOpen = false;
+  guardarTrabajador() {
+    if (this.trabajadorForm.invalid) return;
+
+    if (this.isEditMode && this.idSeleccionado) {
+      // MODO EDICIÓN
+      this.trabajadorService.actualizar(this.idSeleccionado, this.trabajadorForm.value).subscribe({
+        next: () => {
+          this.finalizarOperacion();
+          alert('✅ Trabajador actualizado con éxito.');
+        },
+        error: (err) => {
+          console.error('Error al actualizar:', err);
+          // Atrapamos el mensaje de error de Spring Boot
+          const mensaje = err.error?.message || 'Error al actualizar. Verifica que el DNI o Correo no estén repetidos.';
+          alert('❌ ' + mensaje);
+        }
+      });
+    } else {
+      // MODO CREACIÓN
+      this.trabajadorService.crear(this.trabajadorForm.value).subscribe({
+        next: () => {
+          this.finalizarOperacion();
+          alert('✅ Trabajador registrado con éxito.');
+        },
+        error: (err) => {
+          console.error('Error al crear:', err);
+          // Atrapamos el mensaje de error de Spring Boot ("El correo ya está registrado")
+          const mensaje = err.error?.message || 'Error al registrar. Verifica que el DNI o Correo no estén repetidos en el sistema.';
+          alert('❌ ' + mensaje);
+        }
+      });
+    }
   }
 
+  cambiarEstado(trabajador: Trabajador) {
+    const accion = trabajador.activo ? 'desactivar' : 'reactivar';
+    
+    if (confirm(`¿Estás seguro de que deseas ${accion} a este trabajador?`)) {
+      this.trabajadorService.cambiarEstado(trabajador.id).subscribe({
+        next: () => {
+          this.cargarTrabajadores();
+          // Opcional: un alert pequeñito
+          alert(`Trabajador ${trabajador.activo ? 'desactivado' : 'reactivado'} correctamente.`);
+        }
+      });
+    }
+  }
+
+  // Limpia todo al cerrar o terminar
+  finalizarOperacion() {
+    this.cerrarModal();
+    this.cargarTrabajadores();
+    this.trabajadorForm.reset();
+    this.isEditMode = false;
+    this.idSeleccionado = null;
+  }
+
+  abrirModal(): void { this.isModalOpen = true; }
+  cerrarModal(): void { this.isModalOpen = false; }
 }
