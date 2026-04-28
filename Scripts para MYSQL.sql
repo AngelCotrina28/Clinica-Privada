@@ -5,10 +5,21 @@ NO HAY APARTADO PARA CREAR ROLES, ASI QUE SIEMPRE TRABAJAREMOS CON LOS MISMOS: A
 ENFERMERA Y MEDICO.
 INSERTAR TRABAJADORES NO ES NECESARIO DEBIDO A QUE SI EXISTE BOTONES PARA CREARLOS EN EL SISTEMA.*/
 
+/*PRIMERO EJECUTAR ESTOS COMANDOS:*/
+
 DROP DATABASE bd_clinica;
 CREATE DATABASE bd_clinica;
 
-INSERT INTO roles (nombre, descripcion) VALUES ('Administrador', 'Administrador del sistema');
-INSERT INTO roles (nombre, descripcion) VALUES ('Medico', 'Médico de la clínica');
-INSERT INTO roles (nombre, descripcion) VALUES ('Enfermera', 'Enfermero de la clínica');
-INSERT INTO roles (nombre, descripcion) VALUES ('Cajero', 'Cajero de la clínica');
+
+/*LUEGO CORRER EL BACKEND DEL SISTEMA, PARA QUE PUEDA CREAR LAS TABLAS, NO OLVIDAR CONFIGURAR EL 
+ARCHIVO backend/src/resources/aplicattion.properties CON SUS CREDENCIALES DE SUS RESPECTIVAS BD'S.
+UNA VEZ CORRIDO EL BACKEND YA DEBEN ESTAR CREADAS LAS TABLAS EN MYSQL, EJECUTAR ESTOS COMANDOS:*/
+
+INSERT INTO roles (id, nombre, descripcion) VALUES
+(1,'ADMINISTRADOR', 'Rol Principal de clinica, maneja todas las funcionalidades del sistema'),
+(2,'MEDICO', 'Médico de la clínica'),
+(3,'ENFERMERO', 'Registra cita médica de CONSULTA EXTERNA y apertura historial clínico'),
+(4,'JEFE_ENFERMERIA', 'Registra cita médica de EMERGENCIA y apertura historial clínico'),
+(5,'RECEPCIONISTA', 'Registra cita médica y apertura historial clínico'),
+(6,'TECNICO_FARMACIA', 'Registra ordenes de medicamentos'),
+(7,'CAJERO', 'Abre caja y realiza cobros de servicios médicos');
