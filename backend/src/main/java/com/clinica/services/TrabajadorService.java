@@ -2,8 +2,10 @@ package com.clinica.services;
 
 import com.clinica.dtos.TrabajadorRequestDTO;
 import com.clinica.dtos.TrabajadorResponseDTO;
+import com.clinica.model.entities.Especialidad;
 import com.clinica.model.entities.Rol;
 import com.clinica.model.entities.Trabajador;
+import com.clinica.model.repositories.EspecialidadRepository;
 import com.clinica.model.repositories.RolRepository;
 import com.clinica.model.repositories.TrabajadorRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,13 +13,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TrabajadorService {
 
+    private final EspecialidadRepository especialidadRepository;
     private final TrabajadorRepository trabajadorRepository;
     private final RolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
@@ -34,6 +39,17 @@ public class TrabajadorService {
 
         Rol rol = rolRepository.findById(dto.getRolId())
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        
+        if (rol.getNombre().equalsIgnoreCase("Médico")) {
+            if (dto.getColegiatura() == null || dto.getColegiatura().isBlank()) {
+                throw new RuntimeException("El número de colegiatura es obligatorio para el rol Médico.");
+            }
+        }
+
+        Set<Especialidad> especialidades = new java.util.HashSet<>();
+        if (rol.getNombre().equalsIgnoreCase("Médico") && dto.getEspecialidadesIds() != null && !dto.getEspecialidadesIds().isEmpty()) {
+            especialidades = new java.util.HashSet<>(especialidadRepository.findAllById(dto.getEspecialidadesIds()));
+        }
 
         Trabajador trabajador = Trabajador.builder()
                 .dni(dto.getDni())
@@ -47,6 +63,7 @@ public class TrabajadorService {
                 .telefono(dto.getTelefono())
                 .fechaNacimiento(dto.getFechaNacimiento())
                 .colegiatura(dto.getColegiatura())
+                .especialidades(especialidades)
                 .build();
 
         trabajador = trabajadorRepository.save(trabajador);
@@ -54,7 +71,7 @@ public class TrabajadorService {
     }
 
     @Transactional
-    public void cambiarEstado(Byte id) {
+    public void cambiarEstado(Long id) {
         Trabajador trabajador = trabajadorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Trabajador no encontrado"));
         
@@ -71,7 +88,18 @@ public class TrabajadorService {
                 .collect(Collectors.toList());
     }
 
+    public List<TrabajadorResponseDTO> listarMedicosActivos() {
+        // Buscamos ignorando mayúsculas/minúsculas para evitar errores tipográficos en BD
+        return trabajadorRepository.findByRolNombreIgnoreCaseAndActivoTrue("MEDICO").stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
     private TrabajadorResponseDTO mapToDTO(Trabajador trabajador) {
+        List<String> especialidadesNombres = trabajador.getEspecialidades() != null 
+            ? trabajador.getEspecialidades().stream().map(Especialidad::getNombre).collect(Collectors.toList())
+            : new ArrayList<>()
+            ;
         return TrabajadorResponseDTO.builder()
                 .id(trabajador.getId())
                 .dni(trabajador.getDni())
@@ -81,13 +109,16 @@ public class TrabajadorService {
                 .telefono(trabajador.getTelefono()) 
                 .fechaNacimiento(trabajador.getFechaNacimiento()) 
                 .colegiatura(trabajador.getColegiatura()) 
+                .rolId(trabajador.getRol().getId())
                 .nombreRol(trabajador.getRol().getNombre())
                 .activo(trabajador.isActivo())
+                .especialidades(especialidadesNombres)
                 .build();
     }
 
     @Transactional
-    public TrabajadorResponseDTO actualizar(Byte id, TrabajadorRequestDTO dto) {
+    public TrabajadorResponseDTO actualizar(Long id, TrabajadorRequestDTO dto) {
+
         Trabajador trabajador = trabajadorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Trabajador no encontrado"));
 
@@ -104,10 +135,15 @@ public class TrabajadorService {
         trabajador.setTelefono(dto.getTelefono());
         trabajador.setFechaNacimiento(dto.getFechaNacimiento());
         trabajador.setColegiatura(dto.getColegiatura());
-        
         Rol rol = rolRepository.findById(dto.getRolId())
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
         trabajador.setRol(rol);
+
+        if (rol.getNombre().equalsIgnoreCase("Médico")) {
+            if (dto.getColegiatura() == null || dto.getColegiatura().isBlank()) {
+                throw new RuntimeException("El número de colegiatura es obligatorio para el rol Médico.");
+            }
+        }
 
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             trabajador.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
