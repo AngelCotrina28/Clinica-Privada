@@ -1,9 +1,10 @@
-/*Ejecutar todo de golpe.
+/*
 NO COLOCAR INSERT DE COSAS NO NECESARIAS
 EJEMPLO: INSERTAR ROLES ES NECESARIO YA QUE SON DATOS ESTATICOS CASI 0 DINAMICOS, POR ENDE
 NO HAY APARTADO PARA CREAR ROLES, ASI QUE SIEMPRE TRABAJAREMOS CON LOS MISMOS: ADMI, CAJERO, 
 ENFERMERA Y MEDICO.
-INSERTAR TRABAJADORES NO ES NECESARIO DEBIDO A QUE SI EXISTE BOTONES PARA CREARLOS EN EL SISTEMA.*/
+INSERTAR TRABAJADORES NO ES NECESARIO DEBIDO A QUE SI EXISTE BOTONES PARA CREARLOS EN EL SISTEMA.
+*/
 
 /*PRIMERO EJECUTAR ESTOS COMANDOS:*/
 
@@ -68,3 +69,11 @@ INSERT INTO especialidades (nombre, descripcion) VALUES
 ('Gastroenterología Pediátrica', 'Trastornos digestivos específicos en niños.'),
 ('Cardiología Pediátrica', 'Enfermedades del corazón específicas en niños.'),
 ('Neonatología', 'Cuidado y tratamiento de recién nacidos, especialmente los prematuros.');
+
+--Script para INSERTAR UNA INSTANCIA DE TRABAJADOR Y PODER EMPEZAR A TRABAJAR:
+--user: admin
+--password: admin123
+INSERT INTO trabajadores (id, activo, colegiatura, created_at, dni, email, fecha_nacimiento, nombre_completo, password_hash, 
+    telefono, updated_at, username, rol_id) VALUES 
+(1, 1, NULL, '2026-04-30 22:26:17', '12345678', 'admin@clinica.com', '1990-01-01', 'Administrador del Sistema', '$2a$10$QFo1SwDMcwIuhIeGvtX3EOqMqiQ.ctiJvAdnNtD/oyBrRosfZjEea', 
+    '999888777', '2026-04-30 22:26:17', 'admin', 1);
