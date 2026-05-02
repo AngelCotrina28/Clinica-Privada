@@ -16,6 +16,8 @@ CREATE DATABASE bd_clinica;
 ARCHIVO backend/src/resources/aplicattion.properties CON SUS CREDENCIALES DE SUS RESPECTIVAS BD'S.
 UNA VEZ CORRIDO EL BACKEND YA DEBEN ESTAR CREADAS LAS TABLAS EN MYSQL, EJECUTAR ESTOS COMANDOS:*/
 
+--SCRIP CREACION DE ROLES
+
 INSERT INTO roles (id, nombre, descripcion) VALUES
 (1,'ADMINISTRADOR', 'Rol Principal de clinica, maneja todas las funcionalidades del sistema'),
 (2,'MEDICO', 'Médico de la clínica'),
@@ -26,7 +28,6 @@ INSERT INTO roles (id, nombre, descripcion) VALUES
 (7,'CAJERO', 'Abre caja y realiza cobros de servicios médicos');
 
 -- Script de inserción de Especialidades Médicas
--- Usamos INSERT IGNORE por si lo corres dos veces, no te duplique los datos.
 
 INSERT INTO especialidades (nombre, descripcion) VALUES
 ('Alergología', 'Diagnóstico y tratamiento de alergias y enfermedades inmunológicas.'),
