@@ -88,7 +88,8 @@ export class SidebarComponent implements OnInit {
   toggleSidebar(): void {
     this.colapsado.update(v => !v);
     if (this.colapsado()) {
-      this.adminAbierto.set(false); // Cerramos trocitos si se colapsa la barra
+      this.adminAbierto.set(false);
+      this.admisionAbierto.set(false); // Aprovechamos para limpiar este también
     }
   }
 
@@ -105,7 +106,6 @@ export class SidebarComponent implements OnInit {
     this.admisionAbierto.update(v => !v);
   }
 
-  // Devuelve qué signal usar según la etiqueta del ítem padre
   estaAbierto(label: string): boolean {
     if (label.includes('Admisión')) return this.admisionAbierto();
     if (label.includes('Administración')) return this.adminAbierto();

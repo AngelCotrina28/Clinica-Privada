@@ -1,70 +1,23 @@
-<app-header titulo="Módulo de Atención Médica" Trabajador="Dr. Carlos Mendoza" />
+<app-header titulo="Módulo de Atención Médica" Trabajador="Dr. Carlos Mendoza"></app-header>
 
 <main class="contenedor">
+  @if (pacienteActivo) {
+  <div class="paciente-banner">
+    <div class="paciente-info">
+      <h2>{{ pacienteActivo.nombreCompleto }}</h2>
+      <p>DNI: {{ pacienteActivo.dniPaciente }} | HC: {{ pacienteActivo.numeroHistoria }}</p>
+    </div>
+    <button (click)="finalizarAtencion()" class="btn-finalizar">Finalizar Atención</button>
+  </div>
 
-  <!-- Historia Clínica -->
-  <section>
-    <h2 class="subtitulo-seccion">Registro de Resultados de Atención</h2>
-    <form>
-      <fieldset>
-        <legend>Historia Clínica del Paciente Actual</legend>
+  <nav class="tabs-clinicas">
+    <a routerLink="historial-clinico" routerLinkActive="active">📋 Historial Clínico</a>
+    <a routerLink="registro-resultados" routerLinkActive="active">✍️ Registrar Resultados</a>
+    <a routerLink="receta-medica" routerLinkActive="active">💊 Emitir Receta</a>
+  </nav>
+  }
 
-        <label for="nro_cita">N° Cita / Orden:</label>
-        <input type="text" id="nro_cita" value="CE-045" readonly>
-
-        <label for="diagnostico">Diagnóstico (CIE-10):</label>
-        <input type="text" id="diagnostico" required>
-
-        <label for="notas_evolucion">Notas de Evolución:</label>
-        <textarea id="notas_evolucion" rows="5"></textarea>
-
-        <button type="submit">Guardar en Historia Clínica</button>
-      </fieldset>
-    </form>
-  </section>
-
-  <!-- Receta -->
-  <section>
-    <h2 class="subtitulo-seccion">Emisión de Recetas Médicas</h2>
-    <form>
-      <fieldset>
-        <legend>Receta Digital</legend>
-
-        <label for="medicamento">Medicamento:</label>
-        <input type="text" id="medicamento" list="medicamentos_list">
-        <datalist id="medicamentos_list">
-          @for (med of medicamentosDisponibles; track med) {
-            <option [value]="med">
-          }
-        </datalist>
-
-        <label for="dosis">Dosis e Indicaciones:</label>
-        <input type="text" id="dosis">
-
-        <button type="button">Añadir a la Receta</button>
-
-        <div class="tabla-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Medicamento</th>
-                <th>Indicaciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of receta; track item.medicamento) {
-                <tr>
-                  <td>{{ item.medicamento }}</td>
-                  <td>{{ item.indicaciones }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <button type="submit">Emitir Receta Digital</button>
-      </fieldset>
-    </form>
-  </section>
-
+  <div class="workspace-content">
+    <router-outlet></router-outlet>
+  </div>
 </main>

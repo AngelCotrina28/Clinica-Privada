@@ -1,0 +1,45 @@
+<section>
+    <h2 class="subtitulo-seccion">Emisión de Recetas Médicas</h2>
+
+    <form>
+        <fieldset>
+            <legend>Receta Digital</legend>
+
+            <label for="medicamento">Medicamento:</label>
+            <input type="text" id="medicamento" list="medicamentos_list" class="campo__input">
+            <datalist id="medicamentos_list">
+                @for (med of medicamentosDisponibles; track med) {
+                <option [value]="med"></option>
+                }
+            </datalist>
+
+            <label for="dosis">Dosis e Indicaciones:</label>
+            <input type="text" id="dosis" class="campo__input">
+
+            <button type="button" class="btn btn--contorno" style="margin-top: 10px;">Añadir a la Receta</button>
+
+            <div class="tabla-responsive" style="margin-top: 20px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Medicamento</th>
+                            <th>Indicaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of receta; track item.medicamento) {
+                        <tr>
+                            <td>{{ item.medicamento }}</td>
+                            <td>{{ item.indicaciones }}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn--primario">Emitir Receta Digital</button>
+            </div>
+        </fieldset>
+    </form>
+</section>
