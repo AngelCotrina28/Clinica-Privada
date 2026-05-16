@@ -16,7 +16,11 @@ backend/*.war
 
 # OS
 .DS_Store
+<<<<<<< HEAD
+Thumbs.db
+=======
 Thumbs.db
 
 # JWT
 .env
+>>>>>>> 493cebeb0b0735ed9444b44c5ee4385f742d73a5
