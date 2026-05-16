@@ -1,13 +1,14 @@
-import { EspecialidadService } from '../../../core/services/especialidad.service';
-import { Especialidad } from '../../../core/model/especialidad.model';
-import { TrabajadorService } from '../../../core/services/trabajador.service';
-import { Trabajador } from '../../../core/model/trabajador.model';
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { EspecialidadService } from '../../../core/services/especialidad.service';
+import { Especialidad } from '../../../core/model/especialidad.model';
+import { CitaService } from '../../../core/services/cita.service';
+import { Trabajador } from '../../../core/model/trabajador.model';
 import { HeaderComponent } from '../../../shared/header/header.component';
-import { CitaRequest } from '../admision.models';
+import { AbrirHistoriaRequest, CitaRequest, CitaResponse, HistoriaClinicaResponse, HorarioBloque } from '../admision.models';
 
 @Component({
   selector: 'app-admision-consulta',
@@ -17,57 +18,125 @@ import { CitaRequest } from '../admision.models';
   styleUrl: '../admision.component.scss'
 })
 export class AdmisionConsultaComponent implements OnInit {
+  private readonly API = 'http://localhost:8080/api';
 
-  // --- VARIABLES DEL STEPPER ---
   pasoActual = signal<number>(1);
   totalPasos = 4;
 
-  // --- MODELO DE DATOS ---
   cita: CitaRequest = { historiaClinicaId: null, especialidadId: null, fechaHora: '' };
-  medicoSeleccionado: any = null;
+  medicoSeleccionado: Trabajador | null = null;
+  fechaSeleccionada = '';
+  bloquesHorarios: HorarioBloque[] = [];
+  bloqueSeleccionado: HorarioBloque | null = null;
+  citaProgramada = signal<CitaResponse | null>(null);
   exitoMensaje = signal('');
+  errorMensaje = signal('');
 
-  // --- VARIABLES DEL AUTOCOMPLETADO ---
-  terminoBusquedaEspecialidad: string = '';
-  mostrarDropdownEspecialidad: boolean = false;
+  dniBusqueda = '';
+  mostrarFormNueva = false;
+  historiaSeleccionada = signal<HistoriaClinicaResponse | null>(null);
+  nuevaHistoria: AbrirHistoriaRequest = this.initHistoria();
+  cargandoHistoria = signal(false);
+
+  terminoBusquedaEspecialidad = '';
+  mostrarDropdownEspecialidad = false;
   especialidadesDB: Especialidad[] = [];
   especialidadesFiltradas: Especialidad[] = [];
   medicosDisponibles: Trabajador[] = [];
-  cargandoMedicos: boolean = false;
-
-  // --- MÉTODOS DE FECHA Y HORA ---
-  obtenerFechaMinima(): string {
-    const ahora = new Date();
-    ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
-    return ahora.toISOString().slice(0, 16);
-  }
+  cargandoMedicos = false;
+  cargandoHorarios = false;
+  guardandoCita = false;
 
   constructor(
     private route: ActivatedRoute,
+    private http: HttpClient,
     private especialidadService: EspecialidadService,
-    private trabajadorService: TrabajadorService
+    private citaService: CitaService
   ) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(p => {
-      if (p['historiaId']) this.cita.historiaClinicaId = +p['historiaId'];
+      if (p['historiaId']) {
+        this.seleccionarHistoria({
+          id: +p['historiaId'],
+          numeroHistoria: p['numeroHistoria'] ?? '',
+          dniPaciente: '',
+          nombreCompleto: p['nombre'] ?? '',
+          creadoPor: '',
+          createdAt: '',
+          nuevaHistoria: false
+        });
+      }
     });
 
-    // Cargar especialidades desde la Base de Datos real al iniciar
     this.especialidadService.listar().subscribe({
-      next: (data) => {
+      next: data => {
         this.especialidadesDB = data;
-        // NO llenamos especialidadesFiltradas para que el dropdown inicie vacío
       },
-      error: (err) => console.error('Error al cargar especialidades de la BD', err)
+      error: err => console.error('Error al cargar especialidades de la BD', err)
     });
   }
 
-  // --- MÉTODOS DEL AUTOCOMPLETADO ---
+  obtenerFechaMinima(): string {
+    const ahora = new Date();
+    ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
+    return ahora.toISOString().slice(0, 10);
+  }
+
+  buscarHistoria(): void {
+    if (!this.dniBusqueda.trim()) return;
+    this.limpiarMensajes();
+    this.limpiarHistoriaSeleccionada();
+    this.cargandoHistoria.set(true);
+    this.http.get<HistoriaClinicaResponse>(
+      `${this.API}/admision/historia?dni=${encodeURIComponent(this.dniBusqueda.trim())}`
+    ).subscribe({
+      next: h => {
+        this.seleccionarHistoria(h);
+        this.cargandoHistoria.set(false);
+      },
+      error: (e: HttpErrorResponse) => {
+        if (e.status === 404) {
+          this.mostrarFormNueva = true;
+          this.nuevaHistoria.dniPaciente = this.dniBusqueda.trim();
+        } else {
+          this.errorMensaje.set(e.error?.mensaje ?? 'Error al buscar la historia.');
+        }
+        this.cargandoHistoria.set(false);
+      }
+    });
+  }
+
+  abrirNuevaHistoria(form: NgForm): void {
+    if (form.invalid) return;
+    this.limpiarMensajes();
+    this.cargandoHistoria.set(true);
+    this.nuevaHistoria.desdeAdmision = true;
+    this.http.post<HistoriaClinicaResponse>(`${this.API}/admision/historia`, this.nuevaHistoria).subscribe({
+      next: resp => {
+        this.seleccionarHistoria(resp);
+        this.dniBusqueda = resp.dniPaciente;
+        this.mostrarFormNueva = false;
+        this.nuevaHistoria = this.initHistoria();
+        this.exitoMensaje.set(`Historia ${resp.numeroHistoria} creada. Continue con la programacion de la cita.`);
+        this.cargandoHistoria.set(false);
+      },
+      error: (e: HttpErrorResponse) => {
+        this.errorMensaje.set(e.error?.mensaje ?? 'Error al crear la historia.');
+        this.cargandoHistoria.set(false);
+      }
+    });
+  }
+
+  cancelarNueva(): void {
+    this.mostrarFormNueva = false;
+    this.nuevaHistoria = this.initHistoria();
+    this.limpiarMensajes();
+  }
+
   filtrarEspecialidades(): void {
     const termino = this.terminoBusquedaEspecialidad.toLowerCase().trim();
 
-    // Regla 1: Si no hay texto, ocultamos y vaciamos todo
     if (!termino) {
       this.especialidadesFiltradas = [];
       this.mostrarDropdownEspecialidad = false;
@@ -76,13 +145,10 @@ export class AdmisionConsultaComponent implements OnInit {
     }
 
     this.mostrarDropdownEspecialidad = true;
-
-    // Regla 2: Filtrar las que COMIENZAN exactamente con la letra/palabra
     this.especialidadesFiltradas = this.especialidadesDB.filter(esp =>
       esp.nombre.toLowerCase().startsWith(termino)
     );
 
-    // Seguridad: Si modifica el texto válido, borramos el ID seleccionado temporalmente
     const coincidenciaExacta = this.especialidadesDB.find(e => e.nombre.toLowerCase() === termino);
     if (!coincidenciaExacta) {
       this.cita.especialidadId = null;
@@ -93,20 +159,21 @@ export class AdmisionConsultaComponent implements OnInit {
     this.cita.especialidadId = esp.id;
     this.terminoBusquedaEspecialidad = esp.nombre;
     this.mostrarDropdownEspecialidad = false;
+    this.medicosDisponibles = [];
+    this.medicoSeleccionado = null;
+    this.limpiarSeleccionHorario();
   }
 
   cerrarDropdown(): void {
     setTimeout(() => {
       this.mostrarDropdownEspecialidad = false;
       if (!this.cita.especialidadId) {
-        this.terminoBusquedaEspecialidad = ''; // Limpia si hizo clic fuera sin seleccionar
+        this.terminoBusquedaEspecialidad = '';
       }
     }, 200);
   }
 
-  // --- MÉTODOS DEL STEPPER ---
   siguientePaso(): void {
-    // Si estamos pasando del Paso 1 al Paso 2, cargamos los médicos
     if (this.pasoActual() === 1 && this.cita.especialidadId) {
       this.cargarMedicosPorEspecialidad();
     }
@@ -117,27 +184,57 @@ export class AdmisionConsultaComponent implements OnInit {
   }
 
   cargarMedicosPorEspecialidad(): void {
+    if (!this.cita.especialidadId) return;
     this.cargandoMedicos = true;
     this.medicosDisponibles = [];
     this.medicoSeleccionado = null;
+    this.limpiarSeleccionHorario();
 
-    this.trabajadorService.getMedicosActivos().subscribe({
-      next: (medicos) => {
-        const especialidadElegida = this.terminoBusquedaEspecialidad.toLowerCase();
-
-        // CORRECCIÓN: Como m.especialidades es un Array (string[]), usamos .some()
-        this.medicosDisponibles = medicos.filter(m =>
-          m.especialidades &&
-          m.especialidades.some(esp => esp.toLowerCase().includes(especialidadElegida))
-        );
-
+    this.citaService.listarMedicosPorEspecialidad(this.cita.especialidadId).subscribe({
+      next: medicos => {
+        this.medicosDisponibles = medicos;
         this.cargandoMedicos = false;
       },
-      error: (err) => {
-        console.error('Error al cargar los médicos', err);
+      error: err => {
+        console.error('Error al cargar los medicos', err);
         this.cargandoMedicos = false;
       }
     });
+  }
+
+  seleccionarMedico(medico: Trabajador): void {
+    this.medicoSeleccionado = medico;
+    this.limpiarSeleccionHorario();
+    this.cita.medicoId = medico.id;
+  }
+
+  cargarDisponibilidad(): void {
+    if (!this.medicoSeleccionado || !this.fechaSeleccionada) return;
+    this.cargandoHorarios = true;
+    this.bloquesHorarios = [];
+    this.bloqueSeleccionado = null;
+    this.cita.fechaHora = '';
+    this.cita.turnoId = null;
+    this.cita.consultorioId = null;
+
+    this.citaService.obtenerDisponibilidad(this.medicoSeleccionado.id, this.fechaSeleccionada).subscribe({
+      next: bloques => {
+        this.bloquesHorarios = bloques;
+        this.cargandoHorarios = false;
+      },
+      error: (e: HttpErrorResponse) => {
+        this.errorMensaje.set(e.error?.mensaje ?? 'Error al cargar horarios disponibles.');
+        this.cargandoHorarios = false;
+      }
+    });
+  }
+
+  seleccionarBloque(bloque: HorarioBloque): void {
+    if (!bloque.disponible || !this.fechaSeleccionada) return;
+    this.bloqueSeleccionado = bloque;
+    this.cita.fechaHora = `${this.fechaSeleccionada}T${bloque.horaInicio}`;
+    this.cita.turnoId = bloque.turnoId;
+    this.cita.consultorioId = bloque.consultorioId;
   }
 
   pasoAnterior(): void {
@@ -147,15 +244,65 @@ export class AdmisionConsultaComponent implements OnInit {
   }
 
   programarCita(): void {
-    const payload = {
+    if (!this.cita.historiaClinicaId || !this.cita.especialidadId || !this.medicoSeleccionado || !this.bloqueSeleccionado) {
+      this.errorMensaje.set('Complete historia, especialidad, medico y horario.');
+      return;
+    }
+
+    const payload: CitaRequest = {
       historiaClinicaId: this.cita.historiaClinicaId,
       especialidadId: this.cita.especialidadId,
-      medicoId: this.medicoSeleccionado?.id,
-      fechaHora: this.cita.fechaHora
+      medicoId: this.medicoSeleccionado.id,
+      fechaHora: this.cita.fechaHora,
+      turnoId: this.bloqueSeleccionado.turnoId,
+      consultorioId: this.bloqueSeleccionado.consultorioId
     };
 
-    console.log('Enviando cita al backend:', payload);
+    this.limpiarMensajes();
+    this.guardandoCita = true;
+    this.citaService.programar(payload).subscribe({
+      next: cita => {
+        this.citaProgramada.set(cita);
+        this.exitoMensaje.set(`Cita ${cita.numeroCita} programada correctamente.`);
+        this.guardandoCita = false;
+        this.cargarDisponibilidad();
+      },
+      error: (e: HttpErrorResponse) => {
+        this.errorMensaje.set(e.error?.mensaje ?? 'Error al programar la cita.');
+        this.guardandoCita = false;
+      }
+    });
+  }
 
-    this.exitoMensaje.set('¡Cita programada correctamente! (Falta conectar a BD)');
+  limpiarHistoriaSeleccionada(): void {
+    this.historiaSeleccionada.set(null);
+    this.cita.historiaClinicaId = null;
+    this.pasoActual.set(1);
+  }
+
+  private limpiarSeleccionHorario(): void {
+    this.fechaSeleccionada = '';
+    this.bloquesHorarios = [];
+    this.bloqueSeleccionado = null;
+    this.citaProgramada.set(null);
+    this.cita.medicoId = null;
+    this.cita.fechaHora = '';
+    this.cita.turnoId = null;
+    this.cita.consultorioId = null;
+  }
+
+  private seleccionarHistoria(historia: HistoriaClinicaResponse): void {
+    this.historiaSeleccionada.set(historia);
+    this.cita.historiaClinicaId = historia.id;
+    this.mostrarFormNueva = false;
+  }
+
+  private initHistoria(): AbrirHistoriaRequest {
+    return { dniPaciente: '', nombreCompleto: '', telefono: '', email: '', fechaNacimiento: '', genero: '', direccion: '', desdeAdmision: true };
+  }
+
+  private limpiarMensajes(): void {
+    this.errorMensaje.set('');
+    this.exitoMensaje.set('');
   }
 }
